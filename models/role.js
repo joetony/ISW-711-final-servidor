@@ -3,7 +3,7 @@ const Schema = mongoose.Schema;
 
 
 const role = new Schema({
-    name: { type: String },
+    name: { type: String},
 });
 
 module.exports = mongoose.model('roles', role)

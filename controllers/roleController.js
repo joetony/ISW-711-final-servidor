@@ -1,9 +1,9 @@
 const Role = require("../models/role");
 
 const rolePost = async (req, res) => {
-    var role = new Role();
+   
 
-    const rol = await Rol.findById(req.body.rol_id);
+    const role = await Role.findById(req.body.rol_id);
 
     role.name = req.body.name;
 
@@ -84,33 +84,23 @@ const rolePatch = (req, res) => {
     }
 };
 
-const roleDelete = (req, res) => {
-    // if an specific Role is required
-    if (req.query && req.query.id) {
-        Role.findById(req.query.id, function (err, role) {
-            if (err) {
-                res.status(500);
-                console.log('Error while queryting the role', err)
-                res.json({ error: "Role doesnt exist" })
-            }
-            //if the Role exists
-            if (role) {
-                role.remove(function (err) {
-                    if (err) {
-                        res.status(500).json({ message: "There was an error deleting the role" });
-                    }
-                    res.status(204).json({});
-                })
-            } else {
-                res.status(404);
-                console.log('Error while queryting the role', err)
-                res.json({ error: "Role doesnt exist" })
-            }
-        });
-    } else {
-        res.status(404).json({ error: "You must provide a role ID" });
+const roleDelete = async (req, res) => {
+    try {
+      const roleId = req.params.id; // assuming that you're passing the role ID in the request params
+  
+      // find the role by ID and delete it
+      const result = await Role.findByIdAndDelete(roleId);
+  
+      if (!result) {
+        return res.status(404).json({ msg: 'Role not found' });
+      }
+  
+      return res.json({ msg: 'Role deleted successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ msg: 'Internal server error' });
     }
-};
+  };
 
 
 

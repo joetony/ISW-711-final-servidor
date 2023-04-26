@@ -16,10 +16,13 @@ const user = new Schema({
     number: { type: String },
 
      role: {
-         type: Role.schema,
-         required: false
-        }
+         type: Role.schema
+         
+        },
    
-});
+        status: { type: String, enum: ['Pending', 'Active'], default: 'Pending' },
+        confirmCode: { type: String},
+        phoneCode: { type: String,required: false },
+      }, { timestamps: true });
 
 module.exports = mongoose.model('users', user)

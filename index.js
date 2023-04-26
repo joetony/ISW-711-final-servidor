@@ -11,7 +11,14 @@ const News = require("./models/news");
 const Session = require("./models/session");
 
 
-
+//AUTH
+const {
+  registerPost,
+  passwordLess,
+  confirmAccountGet,
+  login2FAPost,
+  verifyPhoneCode,
+} = require("./controllers/authController");
 
 //SESSION
 
@@ -37,6 +44,8 @@ const {
 
   userPost,
   userGet,
+  userDelete,
+  getAllUsers,
   //userSession,
 } = require("./controllers/userController.js");
 
@@ -73,6 +82,12 @@ const {
   newsDelete,
 } = require("./controllers/newsController");
 
+//TAGS
+
+const {
+  tagsGet
+} = require("./controllers/tagsController");
+
 
 const bodyParser = require("body-parser");
 app.use(bodyParser.json());
@@ -82,8 +97,18 @@ app.use(bodyParser.json());
 const cors = require("cors");
 app.use(cors({
   domains: '*',
-  methods: "*"
+  methods: "*",
+  origin: 'http://localhost:3000' 
 }));
+
+//AUTH
+app.post("/auth/register", registerPost);
+app.get("/auth/confirm/:confirmationCode", confirmAccountGet);
+// app.post("/auth/login", loginPost);
+app.post("/auth/login2FA", login2FAPost);
+app.post("/auth/verifyPhoneCode", verifyPhoneCode);
+app.post("/auth/passwordLess",passwordLess);
+
 
 
 //SESSIION
@@ -96,15 +121,19 @@ app.get("/session", sessionGet);
 app.post("/role", rolePost);
 app.get("/role", roleGet);
 app.patch("/role", rolePatch);
-app.delete("/role", roleDelete);
+app.delete("/role:id", roleDelete);
 
 
 //USERS
 
 app.post("/user", userPost);
-app.get("/user", userGet);
-//app.post("/api/user/login", userSession);
-//app.put("/api/user", userPatch);
+//app.get("/user", userGet);
+app.get("/user", getAllUsers);
+//app.post("/user/login", userSession);
+//app.put("/user", userPatch);
+
+app.delete("/user/:id", userDelete);
+
 
 
 //CATEGORY
@@ -129,6 +158,9 @@ app.post("/news", newsPost);
 app.get("/news", newsGet);
 app.patch("/news", newsPatch);
 app.delete("/news", newsDelete);
+
+// TAGS
+app.get("/api/tags", tagsGet);
 
 
 

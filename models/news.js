@@ -4,6 +4,7 @@ const Schema = mongoose.Schema;
 const User = require('./user');
 const Category = require('./category');
 const Source = require('./source');
+const Tags = require('./tags');
 
 
 const news = new Schema({
@@ -21,6 +22,10 @@ const news = new Schema({
      },
     source: {
         type: Source.schema,
+        required: false
+    },
+    tags: {
+        type: Tags.schema,
         required: false
     }
 

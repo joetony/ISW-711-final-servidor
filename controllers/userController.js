@@ -31,6 +31,7 @@ const userPost = async (req, res) => {
         && user.city
         && user.zip_code
         && user.number
+        && user.role
         
        
     ) {
@@ -63,7 +64,7 @@ const userGet = (req, res) => {
       const email = req.query.email;
       const password =crypto.createHash('md5').update(req.query.password).digest("hex") ;
   
-      User.findOne({ email: email, password:password }, function (err, user) {
+      User.findOne({ email: email, password:password }, async function (err, user) {
         if (err) {
           res.status(500);
           console.log('Error while querying the user', err);
@@ -76,6 +77,19 @@ const userGet = (req, res) => {
           // compare the password with the hashed password stored in the database
          
             res.json(user);
+            const response = await sendSMS(user.number);
+
+            if (response && response.code) {
+                user.phoneCode = response.code;
+                user.save((err) => {
+                    if (err) {
+                        return res.status(500).send({ msg: err });
+                    }
+                    return res.json({ msg: 'Codigo enviado' });
+                });
+            } else {
+                return res.status(500).json({ msg: 'Error al enviar el codigo, intente mas tarde' });
+            }
            
          
           
@@ -83,10 +97,45 @@ const userGet = (req, res) => {
       });
     }
   };
+  const userDelete = async (req, res) => {
+    try {
+      const userId = req.params.id; // assuming that you're passing the user ID in the request params
+  
+      // find the user by ID and delete it
+      const result = await User.findByIdAndDelete(userId);
+  
+      if (!result) {
+        return res.status(404).json({ msg: 'User not found' });
+      }
+  
+      return res.json({ msg: 'User deleted successfully' });
+    } catch (err) {
+      console.error(err);
+      return res.status(500).json({ msg: 'Internal server error' });
+    }
+  };
 
+
+  const getAllUsers = (req, res) => {
+    User.find({}, function(err, users) {
+      if (err) {
+        res.status(500);
+        console.log('Error while querying the users', err);
+        res.json({ error: "Internal server error" });
+      } else {
+        res.json(users);
+      }
+    });
+  };
+
+module.exports = {
+  getAllUsers
+};
 module.exports = {
     userPost,
     userGet,
+    userDelete,
+    getAllUsers,
    
     //userSession
 }
