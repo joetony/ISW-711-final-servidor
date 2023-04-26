@@ -1,8 +1,8 @@
 const axios = require('axios');
-const accountSid = 'AC95b5c4d09e9a09e832902e066a6bf502';
-const authToken = '06b51f3961de1759d2821056b280b2d1';
+const accountSid = '';
+const authToken = '';
 
-//5d7YxXoRZRpPn_mVUyhvkcMEEI2k4woLHDaQJ7iu
+//
 const client = require('twilio')(accountSid, authToken);
 
 

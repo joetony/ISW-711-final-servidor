@@ -4,14 +4,14 @@ const sendEmail = (name, email, confirmationCode) => {
     return new Promise((resolve, reject) => {
         const mailTransporter = nodemailer.createTransport({
 
-            //krqcrqeikpbjhrpo
+            //
 
             host: "smtp.gmail.com",
             port: 465,
             secure: true, // true for 465, false for other ports
             auth: {
-                user: 'hgddtyj@gmail.com', // generated ethereal user
-                pass: 'krqcrqeikpbjhrpo', // generated ethereal password
+                user: '', // generated ethereal user
+                pass: '', // generated ethereal password
             },
 
         });
