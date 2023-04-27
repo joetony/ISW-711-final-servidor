@@ -1,10 +1,9 @@
 const nodemailer = require('nodemailer');
 
-const sendEmail = (name, email, confirmationCode) => {
+const sendEmail = (name, email, confirmationCode,url) => {
     return new Promise((resolve, reject) => {
         const mailTransporter = nodemailer.createTransport({
 
-            //
 
             host: "smtp.gmail.com",
             port: 465,
@@ -23,7 +22,7 @@ const sendEmail = (name, email, confirmationCode) => {
                 `<h1>Correo de confirmación</h1>
                 <h2>Hola ${name || ''}</h2>
                 <p>Gracias por su suscripción. Por favor, confirme su correo electrónico, ingresando al siguiente enlace: </p>
-                <a href=http://localhost:4000/auth/confirm/${confirmationCode}> Entre aquí</a>
+                <a href=${url}${confirmationCode}> Entre aquí</a>
                 </div>` }
 
         mailTransporter.verify().then(() => {
