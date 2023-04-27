@@ -14,10 +14,11 @@ const Session = require("./models/session");
 //AUTH
 const {
   registerPost,
-  passwordLess,
+  loginPasswordLess,
   confirmAccountGet,
   login2FAPost,
   verifyPhoneCode,
+  verifyPasswordLess
 } = require("./controllers/authController");
 
 //SESSION
@@ -95,11 +96,16 @@ app.use(bodyParser.json());
 
 // check for cors
 const cors = require("cors");
-app.use(cors({
+const corsOptions = {
   domains: '*',
-  methods: "*",
-  origin: 'http://localhost:3000' 
-}));
+  origin: ['http://localhost:3000', 'http://localhost:8080'],
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
+  credentials: true,
+  optionSuccessStatus:200
+
+};
+app.use(cors(corsOptions));
 
 //AUTH
 app.post("/auth/register", registerPost);
@@ -107,7 +113,8 @@ app.get("/auth/confirm/:confirmationCode", confirmAccountGet);
 // app.post("/auth/login", loginPost);
 app.post("/auth/login2FA", login2FAPost);
 app.post("/auth/verifyPhoneCode", verifyPhoneCode);
-app.post("/auth/passwordLess",passwordLess);
+app.post("/auth/passwordLess",loginPasswordLess);
+app.get("/auth/passwordLess/:token",verifyPasswordLess);
 
 
 
