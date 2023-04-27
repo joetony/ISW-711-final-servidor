@@ -12,7 +12,7 @@ const secretKey = 'cacahuate';
 const registerPost = async (req, res) => {
 
     const rol = await Role.findById(req.body.role_id)
-  
+
 
     //Cuando se registra el usario, se genera el codigo de confirmación
     const confirmCode = jwt.sign(req.body.email, secretKey);
@@ -58,9 +58,10 @@ const registerPost = async (req, res) => {
             res.header({
                 'location': `http://localhost:4000/user/?id=${user.id}`
             });
+            const url = "http://localhost:4000/auth/confirm/";
 
 
-            const response = await sendEmail(user.first_name, user.email, confirmCode);
+            const response = await sendEmail(user.first_name, user.email, confirmCode, url);
             if (!response) {
                 return res.status(500).json({ msg: "Error al enviar el correo, por favor, ponerse en contacto con el administrador" });
             }
@@ -84,7 +85,32 @@ const confirmAccountGet = async (req, res) => {
                     res.status(500).send({ message: err });
                     return;
                 }
-                return res.send('Cuenta confirmada, ya puede iniciar sesión');
+                return res.send(`
+                  <html>
+                    <head>
+                      <title>Cuenta confirmada</title>
+                      <style>
+                      body {
+                        font-family: Arial, Helvetica, sans-serif;
+                        background-color: #f2f2f2;
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                      }
+                      h1 {
+                        font-size: 36px;
+                        color: green;
+                        text-align: center;
+                      }
+                      </style>
+                    </head>
+                    <body>
+                      <h1>Cuenta confirmada, ya puede iniciar sesión</h1>
+                    </body>
+                  </html>
+                `);
             });
         })
         .catch((e) => console.log("error", e));
@@ -151,46 +177,144 @@ const verifyPhoneCode = async (req, res) => {
             if (!user) {
                 return res.status(401).json({ msg: 'Codigo incorrecto' });
             }
-           
+
+            user.phoneCode = '';
+            await user.save();
 
             const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });
             return res.json({ msg: 'Logueado', token });
         });
 }
-// Verifica el codigo enviado al correo y crea el token de logueo
-const passwordLess = async (req, res) => {
-    const confirmCode = jwt.sign(req.body.email, secretKey);
+// guarda token temporal en el usuario y enviar correo
+const loginPasswordLess = async (req, res) => {
     if (req.body && req.body.email) {
-      const email = req.body.email;
-      User.findOne({ email: email }).exec(async function (err, user) {
-        if (err) {
-          res.status(500);
-          console.log('Error while querying the user', err);
-          res.json({ error: "Internal server error" });
-        } else if (!user) {
-          res.status(404);
-          console.log('User not found');
-          res.json({ error: "User not found" });
-        } else {
-          if (user.status !== 'Active') {
-            return res.status(401).json({ msg: 'Cuenta no verificada' });
-          }
-          const response = await sendEmail(user.first_name, user.email, confirmCode);
-          if (!response) {
-            return res.status(500).json({ msg: "Error al enviar el correo, por favor, ponerse en contacto con el administrador" });
-          }
-          const token = jwt.sign( user.email, secretKey, { expiresIn: "2h" });
-          return res.json( token );
+        const email = req.body.email;
+
+        try {
+            const user = await User.findOne({ email: email }).exec();
+
+            if (!user) {
+                res.status(404);
+                return res.json({ error: "User not found" });
+            }
+
+            if (user.status !== "Active") {
+                res.status(401);
+                return res.json({ error: "Account not verified" });
+            }
+
+            const token = jwt.sign({ email: user.email }, secretKey, {
+                expiresIn: "2h",
+            });
+            const url = "http://localhost:4000/auth/passwordLess/";//este url debe de cambiar, por cual?
+
+            user.tokenTemp = token;
+            await user.save();
+
+            const response = await sendEmail(user.first_name, user.email, token, url);
+
+            if (!response) {
+                res.status(500);
+                return res.json({
+                    error:
+                        "There was an error sending the email, please contact the administrator",
+                });
+            }
+
+            res.status(200);
+            return res.json({
+                message:
+                    "Passwordless login link sent, please check your email to access your account",
+            });
+        } catch (err) {
+            res.status(500);
+            console.error("Error while querying the user", err);
+            return res.json({ error: "Internal server error" });
         }
-      });
+    } else {
+        res.status(400);
+        return res.json({ error: "Bad request, email is missing" });
     }
-  }
-  
+};
+
+
+// Verifica el token enviado al email y crea el token de logueo
+const verifyPasswordLess = async (req, res) => {
+    User.findOne({ tokenTemp: req.params.token }).then((user) => {
+        if (!user) {
+            return res.status(404).send({ message: "Usuario no encontrado" });
+        }
+
+       
+        user.tokenTemp = '';
+        const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });
+
+
+        user.save((err) => {
+            if (err) {
+                res.status(500).send({ message: err });
+                return;
+            }
+
+            return res.send(`
+                <html>
+                    <head>
+                    <title>Inicio de Sesion completado</title>
+                    <style>
+                    body {
+                        font-family: Arial, Helvetica, sans-serif;
+                        display: flex;
+                        flex-direction: column;
+                        justify-content: center;
+                        align-items: center;
+                        height: 100vh;
+                        margin: 0;
+                      }
+                      
+                      p {
+                        font-size: 24px;
+                        color: green;
+                        margin-bottom: 20px; /* add some space between text and button */
+                      }
+                      
+                      button {
+                        background-color: #4CAF50;
+                        border: none;
+                        color: white;
+                        padding: 16px 32px;
+                        text-align: center;
+                        text-decoration: none;
+                        display: inline-block;
+                        font-size: 16px;
+                        cursor: pointer;
+                      }
+                    </style>
+                    </head>
+                    <body>
+                    <p>Cuenta confirmada, ya puede iniciar sesión</p>
+                    <button id="continue-btn">Continuar en la cuenta</button>
+                    <script>
+                       
+                        document.querySelector('#continue-btn').addEventListener('click', () => {
+                       
+                        window.location.href = 'http://localhost:3000/?token=${token}';
+                        });
+                    </script>
+                    </body>
+                </html>
+                `);
+        });
+    })
+        .catch((e) => console.log("error", e));
+}
+
+
 
 module.exports = {
     registerPost,
     confirmAccountGet,
     // loginPost,
     login2FAPost,
-    verifyPhoneCode, passwordLess
+    verifyPhoneCode, loginPasswordLess
+    , verifyPasswordLess
 }
