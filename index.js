@@ -46,7 +46,7 @@ const {
   userPost,
   userGet,
   userDelete,
-  getAllUsers,
+  getAllUsers,activateUser
   //userSession,
 } = require("./controllers/userController.js");
 
@@ -146,8 +146,10 @@ app.get("/user", userGet);
 app.get("/user/all", getAllUsers);
 //app.post("/user/login", userSession);
 //app.put("/user", userPatch);
+app.patch("/user/:id", activateUser);
 
 app.delete("/user/:id", userDelete);
+
 
 
 

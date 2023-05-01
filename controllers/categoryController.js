@@ -56,9 +56,10 @@ const categoryGet = (req, res) => {
 
 const categoryPatch = (req, res) => {
     // Get category by id
+    console.log(req.body);
 
-    if (req.query && req.query.id) {
-        Category.findById(req.query.id, function (err, category) {
+    if (req.body && req.body._id) {
+        Category.findById(req.body._id, function (err, category) {
             if (err) {
                 res.status(404);//Not Found
                 console.log('Error while queryting the category', err)

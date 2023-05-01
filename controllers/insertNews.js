@@ -11,7 +11,8 @@ const fetchAndSaveNews = async (req, res) => {
      
       const newSourceResult = await Source.findById(id );
     
-      await News.deleteMany({ 'source.id': id});      // Delete any existing news articles from the source in the database
+      //await News.deleteMany({ 'source.id': id});      
+      // Delete any existing news articles from the source in the database
 
       //search a newsource id that matches whit the id provided
       

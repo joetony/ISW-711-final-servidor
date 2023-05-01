@@ -9,8 +9,8 @@ const sendEmail = (name, email, confirmationCode,url) => {
             port: 465,
             secure: true, // true for 465, false for other ports
             auth: {
-                user: '', // generated ethereal user
-                pass: '', // generated ethereal password
+                user: 'hgddtyj@gmail.com', // generated ethereal user
+                pass: 'lvunhafimchvcjku', // generated ethereal password
             },
 
         });
