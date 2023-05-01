@@ -9,6 +9,9 @@ const xml2js = require('xml2js');
 const newsPost = async (req, res) => {
     var news = new News();
 
+
+        // Find the source, user and category by their ids
+
     const source = await Source.findById(req.body.source_id);
     const user = await User.findById(req.body.user_id);
     const category = await Category.findById(req.body.category_id);
@@ -48,7 +51,8 @@ const newsPost = async (req, res) => {
         });
     }
 };
-const allNewsGet = async (req, res) => {
+const allNewsGet = async (req, res) => {// gets all the news from the database
+
     try {
       const allNews = await News.find({});
       res.status(200).json(allNews);
@@ -58,7 +62,7 @@ const allNewsGet = async (req, res) => {
     }
   };
 
-const newsGet = async (req, res) => {
+const newsGet = async (req, res) => {//gets the news based on the user_id and category_id provided
     // if a specific User is required
     const xmlData = res.data;
     const jsonData = await parseStringPromise(xmlData);
@@ -117,7 +121,8 @@ const newsPatch = async (req, res) => {
     //notice.category = category;
     //notice.source = source;
 
-    if (req.query && req.query.id) {
+    if (req.query && req.query.id) { // if an id is provided in the query
+
         News.findById(req.query.id, function (err, news) {
             if (err) {
                 res.status(404);

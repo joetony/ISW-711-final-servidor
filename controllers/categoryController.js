@@ -9,7 +9,7 @@ const categoryPost = async (req, res) => {
     ) {
         category.save(function (err) {
             if (err) {
-                res.status(422);
+                res.status(400);// bad requests
                 console.log('Error while saving the category', err)
                 res.json({
                     error: 'There was an error saving the category'
@@ -22,7 +22,7 @@ const categoryPost = async (req, res) => {
             res.json(category);
         });
     } else {
-        res.status(422);
+        res.status(422);//Unprocessable Entity
         console.log('Error while saving the category')
         res.json({
             error: 'No valid data provided for category'
@@ -35,7 +35,7 @@ const categoryGet = (req, res) => {
     if (req.query && req.query.id) {
         Category.findById(req.query.id, function (err, category) {
             if (err) {
-                res.status(404);
+                res.status(404);//Not Found
                 console.log('Error while queryting the category', err)
                 res.json({ error: "Category doesnt exist" })
             }
@@ -45,7 +45,7 @@ const categoryGet = (req, res) => {
         // get all categories
         Category.find(function (err, categories) {
             if (err) {
-                res.status(422);
+                res.status(404);//Not Found
                 res.json({ "error": err });
             }
             res.json(categories);
@@ -60,14 +60,14 @@ const categoryPatch = (req, res) => {
     if (req.query && req.query.id) {
         Category.findById(req.query.id, function (err, category) {
             if (err) {
-                res.status(404);
+                res.status(404);//Not Found
                 console.log('Error while queryting the category', err)
                 res.json({ error: "Category doesnt exist" })
             }
             category.name = req.body.name ? req.body.name : category.name;
             category.save(function (err) {
                 if (err) {
-                    res.status(422);
+                    res.status(400);//bad requests
                     console.log('Error while saving the category', err)
                     res.json({
                         error: 'There was an error saving the category'
@@ -88,7 +88,7 @@ const categoryDelete = (req, res) => {
     if (req.query && req.query.id) {
         Category.findById(req.query.id, function (err, category) {
             if (err) {
-                res.status(500);
+                res.status(404);//Not Found
                 console.log('Error while queryting the category', err)
                 res.json({ error: "Category doesnt exist" })
             }
@@ -96,12 +96,12 @@ const categoryDelete = (req, res) => {
             if (category) {
                 category.remove(function (err) {
                     if (err) {
-                        res.status(500).json({ message: "There was an error deleting the category" });
+                        res.status(500).json({ message: "There was an error deleting the category" });// server errors
                     }
-                    res.status(204).json({});
+                    res.status(204).json({});//No Content
                 })
             } else {
-                res.status(404);
+                res.status(404);//Not Found
                 console.log('Error while queryting the category', err)
                 res.json({ error: "Category doesnt exist" })
             }

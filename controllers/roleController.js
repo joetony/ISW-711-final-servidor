@@ -3,7 +3,7 @@ const Role = require("../models/role");
 const rolePost = async (req, res) => {
    
 
-    const role = await Role.findById(req.body.rol_id);
+    const role = await Role.findById(req.body.rol_id); // find the role by ID
 
     role.name = req.body.name;
 
@@ -11,7 +11,7 @@ const rolePost = async (req, res) => {
     ) {
         role.save(function (err) {
             if (err) {
-                res.status(422);
+                res.status(422);//unprocessable entity
                 console.log('Error while saving the Rol', err)
                 res.json({
                     error: 'There was an error saving the rol'
@@ -24,7 +24,7 @@ const rolePost = async (req, res) => {
             res.json(role);
         });
     } else {
-        res.status(422);
+        res.status(422);//unprocessable entity
         console.log('Error while saving the Rol')
         res.json({
             error: 'No valid data provided for Role'
@@ -37,7 +37,7 @@ const roleGet = (req, res) => {
     if (req.query && req.query.id) {
         Role.findById(req.query.id, function (err, role) {
             if (err) {
-                res.status(404);
+                res.status(404);//not found
                 console.log('Error while queryting the Role', err)
                 res.json({ error: "Role doesnt exist" })
             }
@@ -47,7 +47,7 @@ const roleGet = (req, res) => {
         // get all Roles
         Role.find(function (err, roles) {
             if (err) {
-                res.status(422);
+                res.status(422);//unprocessable entity
                 res.json({ "error": err });
             }
             res.json(roles);
@@ -61,14 +61,14 @@ const rolePatch = (req, res) => {
     if (req.query && req.query.id) {
         Role.findById(req.query.id, function (err, role) {
             if (err) {
-                res.status(404);
+                res.status(404);//not found
                 console.log('Error while queryting the Role', err)
                 res.json({ error: "Role doesnt exist" })
             }
             role.name = req.body.name ? req.body.name : role.name;
             role.save(function (err) {
                 if (err) {
-                    res.status(422);
+                    res.status(422); //unprocessable entity
                     console.log('Error while saving the role', err)
                     res.json({
                         error: 'There was an error saving the role'
@@ -79,7 +79,7 @@ const rolePatch = (req, res) => {
             });
         });
     } else {
-        res.status(404);
+        res.status(404); //not found
         res.json({ error: "Role doesnt exist" })
     }
 };
@@ -92,7 +92,7 @@ const roleDelete = async (req, res) => {
       const result = await Role.findByIdAndDelete(roleId);
   
       if (!result) {
-        return res.status(404).json({ msg: 'Role not found' });
+        return res.status(404).json({ msg: 'Role not found' });// //not found
       }
   
       return res.json({ msg: 'Role deleted successfully' });

@@ -11,10 +11,12 @@ const fetchAndSaveNews = async (req, res) => {
      
       const newSourceResult = await Source.findById(id );
     
-      await News.deleteMany({ 'source.id': id})
+      await News.deleteMany({ 'source.id': id});      // Delete any existing news articles from the source in the database
+
       //search a newsource id that matches whit the id provided
       
-      if (!newSourceResult) {
+      if (!newSourceResult) {   // Check if the source exists in the database
+
           return res.status(404).send('New Source Not found');
       }
 
@@ -40,12 +42,13 @@ const fetchAndSaveNews = async (req, res) => {
               category: categoryFound,
               imagen:item.enclosure
           });
-          const saveNew = await New.save();
+          const saveNew = await New.save(); // Save the new News object to the database
+
           newsList.push(saveNew);
           console.log(saveNew);
       });
 
-      res.status(201).json(newsList);
+      res.status(201).json(newsList);//created and return the saved news articles
 
   } catch (err) {
       console.log('Error al realizar la consulta:', err);

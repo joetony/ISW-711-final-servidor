@@ -17,7 +17,7 @@ const registerPost = async (req, res) => {
     //Cuando se registra el usario, se genera el codigo de confirmación
     const confirmCode = jwt.sign(req.body.email, secretKey);
     const password = crypto.createHash('md5').update(req.body.password).digest("hex");
-    var user = new User();
+    var user = new User();// Create a new user object and set its properties
 
     user.email = req.body.email;
     user.password = password;
@@ -32,7 +32,8 @@ const registerPost = async (req, res) => {
     user.role = rol;
 
 
-    if (user.email
+    if (user.email// Check if all required user properties are provided
+
         && user.first_name
         && user.last_name
         && user.password
@@ -45,9 +46,10 @@ const registerPost = async (req, res) => {
         && user.status
         && user.confirmCode
     ) {
-        user.save(async (err) => {
+        user.save(async (err) => {// Save the user to the database
+
             if (err) {
-                res.status(422);
+                res.status(422);//Unprocessable Entity
                 console.log('Error while saving the user', err)
                 res.json({
                     error: 'There was an error saving the user'
@@ -84,7 +86,8 @@ const confirmAccountGet = async (req, res) => {
                 if (err) {
                     res.status(500).send({ message: err });
                     return;
-                }
+                }                // Return a success message in HTML format
+
                 return res.send(`
                   <html>
                     <head>
@@ -133,16 +136,16 @@ const login2FAPost = async (req, res) => {
               
 
                 if (err) {
-                    res.status(500);
+                    res.status(500);//Internal Server Error
                     console.log('Error while querying the user', err);
                     res.json({ error: "Internal server error" });
                 } else if (!user) {
-                    res.status(401);
+                    res.status(404);//Not Found
                     console.log('User not found');
                     res.json({ error: "User not found" });
                 } else {
 
-                    if (user.status !== 'Active') {
+                    if (user.status !== 'Active') {//check if account is active
                         return res.status(401).json({ msg: 'Cuenta no verificada' });
                     }
 
@@ -154,12 +157,12 @@ const login2FAPost = async (req, res) => {
                         user.phoneCode = response.code;
                         console.log('user.phoneCode');
                         console.log(user.phoneCode);
-                        user.save((err) => {
+                        user.save((err) => {//save user in dababase
                             if (err) {
                                 return res.status(500).send({ msg: err });
                             }
                             console.log('Codigo enviado');
-                            return res.status(201).json({ msg: 'Codigo enviado' });
+                            return res.status(201).json({ msg: 'Codigo enviado' });//return status and json
                         });
                     } else {
                         return res.status(500).json({ msg: 'Error al enviar el codigo, intente mas tarde' });
@@ -187,7 +190,7 @@ const verifyPhoneCode = async (req, res) => {
             await user.save();
 
             const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });
-            return res.status(201).json({ msg: 'Logueado', token });
+            return res.status(201).json({ msg: 'Logueado', token });//Created
         });
 }
 // guarda token temporal en el usuario y enviar correo
@@ -208,7 +211,8 @@ const loginPasswordLess = async (req, res) => {
                 return res.json({ error: "Account not verified" });
             }
 
-            const token = jwt.sign({ email: user.email }, secretKey, {
+            const token = jwt.sign({ email: user.email }, secretKey, { // generate a temporary token to log in the user without a password 
+
                 expiresIn: "2h",
             });
             const url = "http://localhost:4000/auth/passwordLess/";//este url debe de cambiar, por cual?
@@ -216,7 +220,8 @@ const loginPasswordLess = async (req, res) => {
             user.tokenTemp = token;
             await user.save();
 
-            const response = await sendEmail(user.first_name, user.email, token, url);
+            const response = await sendEmail(user.first_name, user.email, token, url);    // Send an email to the user with a link to verify the account and access the app
+
 
             if (!response) {
                 res.status(500);
@@ -226,7 +231,7 @@ const loginPasswordLess = async (req, res) => {
                 });
             }
 
-            res.status(200);
+            res.status(200);//OK
             return res.json({
                 message:
                     "Passwordless login link sent, please check your email to access your account",
@@ -252,7 +257,7 @@ const verifyPasswordLess = async (req, res) => {
 
        
         user.tokenTemp = '';
-        const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });
+        const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });// generate a login token to log in the user without a password 
 
 
         user.save((err) => {
@@ -260,7 +265,9 @@ const verifyPasswordLess = async (req, res) => {
                 res.status(500).send({ message: err });
                 return;
             }
+            res.status(200);//OK
 
+                    // Return an HTML page with a success message 
             return res.send(`
                 <html>
                     <head>

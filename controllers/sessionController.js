@@ -18,10 +18,11 @@ const sessionPost = async (req, res) => {
     && session.user
     && session.expire
 
-  ) {
+  ) {  // Check if all required session details are present
+
     session.save(function (err) {
       if (err) {
-        res.status(422);
+        res.status(422); //unprocessable entity
         console.log('Error while saving the notice', err)
         res.json({
           error: 'There was an error saving the notice'
@@ -35,7 +36,7 @@ const sessionPost = async (req, res) => {
       res.json(session);
     });
   } else {
-    res.status(422);
+    res.status(422); //unprocessable entity
     console.log('Error while saving the session')
     res.json({
       error: 'No valid data provided for session'
