@@ -69,7 +69,7 @@ const {
   sourcePost,
   sourceGet,
   sourcePatch,
-  sourceDelete,
+  sourceDelete,AllSourceGet
 } = require("./controllers/sourceController.js");
 
 
@@ -80,8 +80,16 @@ const {
   newsPost,
   newsGet,
   newsPatch,
-  newsDelete,
+  newsDelete,allNewsGet,newsDeleteAll
+  
 } = require("./controllers/newsController");
+
+// insert news xml only first time
+const {
+
+ fetchAndSaveNews
+  
+} = require("./controllers/insertNews");
 
 //TAGS
 
@@ -134,8 +142,8 @@ app.delete("/role:id", roleDelete);
 //USERS
 
 app.post("/user", userPost);
-//app.get("/user", userGet);
-app.get("/user", getAllUsers);
+app.get("/user", userGet);
+app.get("/user/all", getAllUsers);
 //app.post("/user/login", userSession);
 //app.put("/user", userPatch);
 
@@ -153,21 +161,30 @@ app.delete("/category", categoryDelete);
 
 //SOURCE
 
-app.post("/source", sourcePost);
-app.get("/source", sourceGet);
-app.patch("/source", sourcePatch);
-app.delete("/source", sourceDelete);
+app.post("/newsource", sourcePost);
+app.get("/newsource", sourceGet);
+app.patch("/newsource", sourcePatch);
+app.delete("/newsource", sourceDelete);
+app.get("/source/all", AllSourceGet);
+
 
 
 //NOTICE
+
+
+app.post("/newsource/:id/process", fetchAndSaveNews);
 
 app.post("/news", newsPost);
 app.get("/news", newsGet);
 app.patch("/news", newsPatch);
 app.delete("/news", newsDelete);
+app.get("/news/all", allNewsGet);
+app.delete("/news/all", newsDeleteAll);
+
+
 
 // TAGS
-app.get("/api/tags", tagsGet);
+app.get("/tags", tagsGet);
 
 
 
