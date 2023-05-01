@@ -2,8 +2,9 @@ const Source = require("../models/source");
 const News = require("../models/news");
 const Category = require("../models/category");
 const User = require("../models/user");
-
 const { parseStringPromise } = require('xml2js');
+const fs = require('fs');
+const xml2js = require('xml2js');
 
 const newsPost = async (req, res) => {
     var news = new News();
@@ -47,6 +48,15 @@ const newsPost = async (req, res) => {
         });
     }
 };
+const allNewsGet = async (req, res) => {
+    try {
+      const allNews = await News.find({});
+      res.status(200).json(allNews);
+    } catch (error) {
+      console.log('Error while querying the news:', error);
+      res.status(500).json({ error: "Internal server error" });
+    }
+  };
 
 const newsGet = async (req, res) => {
     // if a specific User is required
@@ -167,7 +177,14 @@ const newsDelete = (req, res) => {
         res.status(404).json({ error: "You must provide a notice ID" });
     }
 };
-
+const newsDeleteAll = (req, res) => {
+    News.deleteMany({}, (err) => {
+      if (err) {
+        res.status(500).json({ message: "There was an error deleting all notices" });
+      }
+      res.status(204).json({});
+    });
+  };
 
 
 
@@ -175,5 +192,5 @@ module.exports = {
     newsPost,
     newsGet,
     newsPatch,
-    newsDelete,
+    newsDelete,allNewsGet,newsDeleteAll
 };
