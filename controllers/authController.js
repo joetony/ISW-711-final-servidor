@@ -127,13 +127,17 @@ const login2FAPost = async (req, res) => {
         const password = crypto.createHash('md5').update(req.body.password).digest("hex");
         User.findOne({ email: email, password: password })
             .exec(async function (err, user) {
+                console.log(user.email);
+                console.log(user.password);
+                console.log(req.body.password);
+              
 
                 if (err) {
                     res.status(500);
                     console.log('Error while querying the user', err);
                     res.json({ error: "Internal server error" });
                 } else if (!user) {
-                    res.status(404);
+                    res.status(401);
                     console.log('User not found');
                     res.json({ error: "User not found" });
                 } else {
@@ -145,6 +149,7 @@ const login2FAPost = async (req, res) => {
                     const response = await sendSMS(user.number);
 
                     if (response && response.code) {
+                      
                         console.log('message sent');
                         user.phoneCode = response.code;
                         console.log('user.phoneCode');
@@ -154,7 +159,7 @@ const login2FAPost = async (req, res) => {
                                 return res.status(500).send({ msg: err });
                             }
                             console.log('Codigo enviado');
-                            return res.json({ msg: 'Codigo enviado' });
+                            return res.status(201).json({ msg: 'Codigo enviado' });
                         });
                     } else {
                         return res.status(500).json({ msg: 'Error al enviar el codigo, intente mas tarde' });
@@ -182,7 +187,7 @@ const verifyPhoneCode = async (req, res) => {
             await user.save();
 
             const token = jwt.sign({ ...user.toObject() }, secretKey, { expiresIn: "2h" });
-            return res.json({ msg: 'Logueado', token });
+            return res.status(201).json({ msg: 'Logueado', token });
         });
 }
 // guarda token temporal en el usuario y enviar correo
