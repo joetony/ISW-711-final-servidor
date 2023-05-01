@@ -27,7 +27,10 @@ const news = new Schema({
     tags: {
         type: Tags.schema,
         required: false
-    }
+    },
+    imagen:{type: String}
+
+   
 
 });
 
