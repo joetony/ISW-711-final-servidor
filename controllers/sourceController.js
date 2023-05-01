@@ -1,22 +1,24 @@
 const Source = require("../models/source");
 //const User = require("../models/user");
 const Category = require("../models/category");
+const User = require("../models/user");
 const { updateOne } = require("../models/role");
 
 const sourcePost = async (req, res) => {
     var source = new Source();
 
-    const category = await Category.findById(req.body.category_id);
-  
+    const categoryFound = await Category.findById(req.body.category_id);
+    const userFound = await User.findById(req.body.user_id);
+
     source.url = req.body.url;
     source.name = req.body.name;
-    source.category = category;
-    //source.user = user_id;
+    source.category = categoryFound;
+    source.user = userFound;
 
     if (source.url
         && source.name
-        && category
-        //&& user_id
+        && source.category
+        && source.user
     ) {
         source.save(function (err) {
             if (err) {
@@ -69,49 +71,61 @@ const sourceGet = (req, res) => {
 };
 
 const sourcePatch = async (req, res) => {
-    // get source by id
-    
-    const category = await Category.findById(req.body.category_id);
-    
-   
-    if (req.query && req.query.id) {
-        Source.findById(req.query.id, function (err, source) {
-            if (err) {
-                res.status(404);
-                console.log('Error while queryting the source', err)
-                res.json({ error: "Source doesnt exist" })
-            }
-            source.url = req.body.url ? req.body.url : source.url;
-            source.name = req.body.name ? req.body.name : source.name;
-            source.category = category;
-            if (source.url
-                && source.name
-                && category
-                //&& user_id
-            ) {
-            // update the source object (patch)
-            
+    try {
+        console.log("Updating source...");
+        console.log("req.body:", req.body);
+        // get source by id
+        console.log("si");
+        const category = await Category.findById(req.body.category_id);
 
-            source.save(function (err) {
+
+        if (req.body && req.body._id) {
+
+            Source.findById(req.body._id, function (err, source) {
                 if (err) {
-                    res.status(422);
-                    console.log('Error while saving the source', err)
-                    res.json({
-                        error: 'There was an error saving the source'
+                    res.status(404);
+                    console.log('Error while queryting the source', err)
+                    res.json({ error: "Source doesnt exist" })
+                }
+                source.url = req.body.url ? req.body.url : source.url;
+                source.name = req.body.name ? req.body.name : source.name;
+                source.category = category;
+
+                if (source.url
+                    && source.name
+                    && category
+                    //&& user_id
+                ) {
+                    // update the source object (patch)
+
+
+                    source.save(function (err) {
+                        if (err) {
+                            res.status(422);
+                            console.log('Error while saving the source', err)
+                            res.json({
+                                error: 'There was an error saving the source'
+                            });
+                        }
+                        console.log(source);
+                        res.status(200); // OK
+                        res.json(source);
                     });
                 }
-                res.status(200); // OK
-                res.json(source);
-            });}
-        });
-    } else {
-        res.status(404);
-        res.json({ error: "Source doesnt exist" })
+            });
+        } else {
+            res.status(404);
+            res.json({ error: "Source doesnt exist" })
+        }
+    } catch (error) {
+        console.log("Error while updating source", error);
+        return res.status(500).json({ error: "Internal server error" });
     }
 };
 
 
 const sourceDelete = (req, res) => {
+
     // if an specific soruce is required
     if (req.query && req.query.id) {
         Source.findById(req.query.id, function (err, soruce) {
@@ -126,6 +140,7 @@ const sourceDelete = (req, res) => {
                     if (err) {
                         res.status(500).json({ message: "There was an error deleting the soruce" });
                     }
+
                     res.status(204).json({});
                 })
             } else {
@@ -139,9 +154,20 @@ const sourceDelete = (req, res) => {
     }
 };
 
+const AllSourceGet = async (req, res) => {
+    try {
+        const sources = await Source.find();
+        res.json(sources);
+        res.status(200);
+    } catch (err) {
+        console.log('Error while querying the source', err);
+        res.status(500).json({ error: "Internal server error" });
+    }
+};
+
 module.exports = {
     sourcePost,
     sourceGet,
     sourcePatch,
-    sourceDelete,
+    sourceDelete, AllSourceGet
 }
